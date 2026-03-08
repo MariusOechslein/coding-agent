@@ -67,48 +67,60 @@ def list_files(path: str = ".") -> str:
 
 SCHEMAS = [
     {
-        "name": "read_file",
-        "description": "Read the contents of a file in the workspace.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "path": {"type": "string", "description": "File path relative to workspace root"},
+        "type": "function",
+        "function": {
+            "name": "read_file",
+            "description": "Read the contents of a file in the workspace.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "File path relative to workspace root"},
+                },
+                "required": ["path"],
             },
-            "required": ["path"],
         },
     },
     {
-        "name": "write_file",
-        "description": "Write content to a file in the workspace. Creates the file and any parent directories if they don't exist.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "path": {"type": "string", "description": "File path relative to workspace root"},
-                "content": {"type": "string", "description": "Content to write"},
+        "type": "function",
+        "function": {
+            "name": "write_file",
+            "description": "Write content to a file in the workspace. Creates the file and any parent directories if they don't exist.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "File path relative to workspace root"},
+                    "content": {"type": "string", "description": "Content to write"},
+                },
+                "required": ["path", "content"],
             },
-            "required": ["path", "content"],
         },
     },
     {
-        "name": "edit_file",
-        "description": "Replace an exact string in a file. Use this for targeted edits.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "path": {"type": "string", "description": "File path relative to workspace root"},
-                "old_string": {"type": "string", "description": "The exact string to replace"},
-                "new_string": {"type": "string", "description": "The replacement string"},
+        "type": "function",
+        "function": {
+            "name": "edit_file",
+            "description": "Replace an exact string in a file. Use this for targeted edits.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "File path relative to workspace root"},
+                    "old_string": {"type": "string", "description": "The exact string to replace"},
+                    "new_string": {"type": "string", "description": "The replacement string"},
+                },
+                "required": ["path", "old_string", "new_string"],
             },
-            "required": ["path", "old_string", "new_string"],
         },
     },
     {
-        "name": "list_files",
-        "description": "List all files and directories in the workspace (or a subdirectory).",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "path": {"type": "string", "description": "Directory path relative to workspace root (default: '.')"},
+        "type": "function",
+        "function": {
+            "name": "list_files",
+            "description": "List all files and directories in the workspace (or a subdirectory).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Directory path relative to workspace root (default: '.')"},
+                },
             },
         },
     },

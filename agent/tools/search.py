@@ -44,15 +44,18 @@ def web_search(query: str, num_results: int = 5) -> str:
 
 SCHEMAS = [
     {
-        "name": "web_search",
-        "description": "Search the web for information. Use this to look up documentation, find libraries, research error messages, etc.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "query": {"type": "string", "description": "Search query"},
-                "num_results": {"type": "integer", "description": "Number of results to return (default 5)"},
+        "type": "function",
+        "function": {
+            "name": "web_search",
+            "description": "Search the web for information. Use this to look up documentation, find libraries, research error messages, etc.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "Search query"},
+                    "num_results": {"type": "integer", "description": "Number of results to return (default 5)"},
+                },
+                "required": ["query"],
             },
-            "required": ["query"],
         },
     },
 ]

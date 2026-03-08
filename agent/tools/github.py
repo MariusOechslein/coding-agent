@@ -63,28 +63,34 @@ def github_get_file(repo: str, path: str, ref: str = "HEAD") -> str:
 
 SCHEMAS = [
     {
-        "name": "github_search_code",
-        "description": "Search GitHub for code examples, libraries, or implementations.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "query": {"type": "string", "description": "GitHub code search query (e.g. 'async retry python')"},
-                "num_results": {"type": "integer", "description": "Number of results (default 5)"},
+        "type": "function",
+        "function": {
+            "name": "github_search_code",
+            "description": "Search GitHub for code examples, libraries, or implementations.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "GitHub code search query (e.g. 'async retry python')"},
+                    "num_results": {"type": "integer", "description": "Number of results (default 5)"},
+                },
+                "required": ["query"],
             },
-            "required": ["query"],
         },
     },
     {
-        "name": "github_get_file",
-        "description": "Read the contents of a file from a public GitHub repository.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "repo": {"type": "string", "description": "Repository in owner/name format (e.g. 'psf/requests')"},
-                "path": {"type": "string", "description": "File path within the repo"},
-                "ref": {"type": "string", "description": "Branch, tag, or commit SHA (default: HEAD)"},
+        "type": "function",
+        "function": {
+            "name": "github_get_file",
+            "description": "Read the contents of a file from a public GitHub repository.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "repo": {"type": "string", "description": "Repository in owner/name format (e.g. 'psf/requests')"},
+                    "path": {"type": "string", "description": "File path within the repo"},
+                    "ref": {"type": "string", "description": "Branch, tag, or commit SHA (default: HEAD)"},
+                },
+                "required": ["repo", "path"],
             },
-            "required": ["repo", "path"],
         },
     },
 ]

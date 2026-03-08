@@ -1,9 +1,10 @@
 """Core agent loop: plan → act → observe → repeat."""
 import json
-import anthropic
+import os
+from openai import AzureOpenAI
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from agent import tools
 
-MODEL = "claude-sonnet-4-6"
 MAX_ITERATIONS = 50
 
 SYSTEM_PROMPT = """\
@@ -21,47 +22,64 @@ Be thorough but efficient. Prefer simple, working solutions.
 """
 
 
+def _make_client() -> AzureOpenAI:
+    endpoint = os.environ["AZURE_OPENAI_ENDPOINT"]
+    api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-02-01")
+    token_provider = get_bearer_token_provider(
+        DefaultAzureCredential(),
+        "https://cognitiveservices.azure.com/.default",
+    )
+    return AzureOpenAI(
+        azure_endpoint=endpoint,
+        azure_ad_token_provider=token_provider,
+        api_version=api_version,
+    )
+
+
 def run(task: str) -> None:
     """Run the agent on a task, streaming output to stdout."""
-    client = anthropic.Anthropic()
-    messages: list[dict] = [{"role": "user", "content": task}]
+    client = _make_client()
+    deployment = os.environ["AZURE_OPENAI_DEPLOYMENT"]
+
+    messages: list[dict] = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": task},
+    ]
 
     print(f"\n[agent] Starting task: {task}\n")
 
     for iteration in range(MAX_ITERATIONS):
-        response = client.messages.create(
-            model=MODEL,
+        response = client.chat.completions.create(
+            model=deployment,
             max_tokens=8096,
-            system=SYSTEM_PROMPT,
             tools=tools.SCHEMAS,
             messages=messages,
         )
 
-        # Append assistant response to history
-        messages.append({"role": "assistant", "content": response.content})
+        choice = response.choices[0]
+        message = choice.message
 
-        # Print any text blocks
-        for block in response.content:
-            if block.type == "text" and block.text.strip():
-                print(block.text)
+        # Append assistant message to history
+        messages.append(message.to_dict())
+
+        # Print any text content
+        if message.content and message.content.strip():
+            print(message.content)
 
         # Check stop reason
-        if response.stop_reason == "end_turn":
+        if choice.finish_reason == "stop":
             print("\n[agent] Done.")
             break
 
-        if response.stop_reason != "tool_use":
-            print(f"\n[agent] Unexpected stop reason: {response.stop_reason}")
+        if choice.finish_reason != "tool_calls":
+            print(f"\n[agent] Unexpected finish reason: {choice.finish_reason}")
             break
 
         # Execute all tool calls
-        tool_results = []
-        for block in response.content:
-            if block.type != "tool_use":
-                continue
+        for tool_call in message.tool_calls:
+            tool_name = tool_call.function.name
+            tool_input = json.loads(tool_call.function.arguments)
 
-            tool_name = block.name
-            tool_input = block.input
             print(f"\n[tool] {tool_name}({_fmt_input(tool_input)})")
 
             handler = tools.DISPATCH.get(tool_name)
@@ -79,13 +97,11 @@ def run(task: str) -> None:
 
             print(f"[result] {result_text[:200]}{'...' if len(result_text) > 200 else ''}")
 
-            tool_results.append({
-                "type": "tool_result",
-                "tool_use_id": block.id,
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
                 "content": result_text,
             })
-
-        messages.append({"role": "user", "content": tool_results})
 
     else:
         print(f"\n[agent] Reached max iterations ({MAX_ITERATIONS}).")

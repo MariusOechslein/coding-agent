@@ -16,19 +16,22 @@ def run_command(command: str, timeout: int = 30) -> str:
 
 SCHEMAS = [
     {
-        "name": "run_command",
-        "description": (
-            "Execute a shell command inside the secure sandbox container. "
-            "The working directory is /workspace. "
-            "Use this to run Python scripts, install packages with uv, run tests, etc."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "command": {"type": "string", "description": "Shell command to run"},
-                "timeout": {"type": "integer", "description": "Timeout in seconds (default 30)"},
+        "type": "function",
+        "function": {
+            "name": "run_command",
+            "description": (
+                "Execute a shell command inside the secure sandbox container. "
+                "The working directory is /workspace. "
+                "Use this to run Python scripts, install packages with uv, run tests, etc."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "command": {"type": "string", "description": "Shell command to run"},
+                    "timeout": {"type": "integer", "description": "Timeout in seconds (default 30)"},
+                },
+                "required": ["command"],
             },
-            "required": ["command"],
         },
     },
 ]

@@ -1,0 +1,13 @@
+[project]
+name = "coding-agent"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=0.84.0",
+    "httpx>=0.28.1",
+    "python-dotenv>=1.2.2",
+]
+
+[project.scripts]
+coding-agent = "agent.main:main"
